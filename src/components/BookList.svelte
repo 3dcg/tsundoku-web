@@ -39,7 +39,10 @@
     const instance = Sortable.create(node, {
       animation: 150,
       ghostClass: "drag-ghost",
-      handle: ".book-card",
+      // Only the explicit handle starts a drag — the rest of the card stays
+      // tappable for navigation, and the card itself doesn't intercept scroll.
+      handle: ".bc-drag-handle",
+      touchStartThreshold: 5,
       onEnd: async () => {
         const ids = Array.from(node.querySelectorAll("[data-book-id]")).map(el => el.dataset.bookId);
         await reorderWithin(statusKey, ids);

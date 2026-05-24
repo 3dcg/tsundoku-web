@@ -9,24 +9,26 @@
 </script>
 
 <div class="book-card" data-book-id={book.id}>
-  <span class="bc-drag-handle" aria-hidden="true">⋮⋮</span>
+  <div class="bc-drag-handle" aria-label="ドラッグして並び替え">⋮⋮</div>
 
-  <a class="bc-title" href="#book/{book.id}" onclick={(e) => { e.preventDefault(); onShow?.(book.id); }}>
-    {book.title}
-  </a>
+  <div class="bc-body">
+    <a class="bc-title" href="#book/{book.id}" onclick={(e) => { e.preventDefault(); onShow?.(book.id); }}>
+      {book.title}
+    </a>
 
-  {#if book.author}
-    <div class="bc-author">{book.author}</div>
-  {/if}
+    {#if book.author}
+      <div class="bc-author">{book.author}</div>
+    {/if}
 
-  {#if book.format || book.tags_text}
-    <div class="bc-meta">
-      {#if book.format}<span class="bc-format">{FORMAT_LABEL[book.format]}</span>{/if}
-      {#if book.tags_text}<span class="bc-tags">{book.tags_text}</span>{/if}
-    </div>
-  {/if}
+    {#if book.format || book.tags_text}
+      <div class="bc-meta">
+        {#if book.format}<span class="bc-format">{FORMAT_LABEL[book.format]}</span>{/if}
+        {#if book.tags_text}<span class="bc-tags">{book.tags_text}</span>{/if}
+      </div>
+    {/if}
 
-  {#if book.why_wanted}
-    <div class="bc-why">{truncate(book.why_wanted, 50)}</div>
-  {/if}
+    {#if book.why_wanted}
+      <div class="bc-why">{truncate(book.why_wanted, 50)}</div>
+    {/if}
+  </div>
 </div>

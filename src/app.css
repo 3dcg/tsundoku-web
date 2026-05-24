@@ -169,21 +169,24 @@ a { color: #06c; }
   gap: 0.7em;
 }
 
-/* Drag-and-drop visual feedback */
-.book-card {
-  cursor: grab;
-  position: relative;
-}
-.book-card:active { cursor: grabbing; }
+/* Drag handle on the LEFT — large enough to tap on mobile (44pt) and
+   touch-action: none prevents the browser from interpreting touch as scroll. */
 .book-card .bc-drag-handle {
-  position: absolute;
-  top: 0.5em;
-  right: 0.6em;
-  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  align-self: stretch;
+  padding: 0 0.3em;
   color: #bbb;
-  letter-spacing: -2px;
+  font-size: 1.1em;
+  letter-spacing: -3px;
   user-select: none;
+  cursor: grab;
+  touch-action: none;
+  border-right: 1px dashed #e5e5e5;
 }
+.book-card .bc-drag-handle:active { cursor: grabbing; }
 .book-card:hover .bc-drag-handle { color: #888; }
 .drag-ghost {
   opacity: 0.4;
@@ -351,20 +354,27 @@ a { color: #06c; }
   }
 }
 
-/* Each book in the grid */
+/* Each book in the grid — handle on left, body on right */
 .book-card {
   border: 1px solid #ddd;
   border-radius: 6px;
-  padding: 0.7em 0.9em;
   background: #fafafa;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3em;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: stretch;
   transition: box-shadow 0.15s;
+  overflow: hidden;
 }
 .book-card:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border-color: #c5c5c5;
+}
+.book-card .bc-body {
+  padding: 0.7em 0.9em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+  min-width: 0;
 }
 .book-card .bc-status { margin-bottom: 0.1em; }
 .book-card .bc-title {

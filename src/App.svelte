@@ -154,7 +154,7 @@
 {:else if !$accessToken}
   <SignIn onSignIn={handleSignIn} />
 {:else}
-  <AppHeader onSignOut={handleSignOut} />
+  <AppHeader onSignOut={handleSignOut} onMessage={showFlash} />
 
   {#if flashVisible && !undoBookId}
     <p class="flash-notice">{flashMessage}</p>

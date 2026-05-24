@@ -87,6 +87,18 @@ export async function restoreBook(id) {
   await updateBook(id, { deleted_at: null });
 }
 
+// Replace all books with the given array (used by import). Saves immediately.
+export async function replaceAllBooks(newBooks) {
+  if (!Array.isArray(newBooks)) throw new Error("books配列が不正です");
+  books.set(newBooks.map(b => createBook(b)));
+  await persist();
+}
+
+// Export current state as JSON string (for download)
+export function exportJson() {
+  return JSON.stringify({ books: get(books) }, null, 2);
+}
+
 export async function reorderWithin(statusKey, orderedIds) {
   const list = get(books);
   const updated = list.map(b => {

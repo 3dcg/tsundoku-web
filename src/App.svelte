@@ -7,7 +7,7 @@
   import AppHeader from "./components/AppHeader.svelte";
   import { books, loaded, loadAll, addBook, updateBook, discardBook, restoreBook, useDriveBackend } from "./lib/store.js";
   import { allTags, parseTags, sortByStatusPriority } from "./lib/book.js";
-  import { accessToken, initAuth, signIn, signOut, trySilentSignIn } from "./lib/auth.js";
+  import { accessToken, initAuth, signIn, signOut } from "./lib/auth.js";
 
   let view = $state("list"); // 'list' | 'new' | 'edit' | 'show'
   let selectedId = $state(null);
@@ -44,8 +44,8 @@
     useDriveBackend();
     await initAuth();
     authReady = true;
-    // Try silent sign-in (works if previously consented this session)
-    await trySilentSignIn();
+    // initAuth restores a cached token from localStorage if still valid,
+    // so the user usually skips the sign-in screen on reloads.
   });
 
   // When access token becomes available, load data from Drive

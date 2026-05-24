@@ -1,5 +1,5 @@
 import { get } from "svelte/store";
-import { accessToken } from "../auth.js";
+import { accessToken, clearCachedToken } from "../auth.js";
 import { DRIVE_FILE_NAME } from "../config.js";
 
 const FILES_API = "https://www.googleapis.com/drive/v3/files";
@@ -13,13 +13,28 @@ function token() {
   return t;
 }
 
+async function driveFetch(url, options = {}) {
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+      Authorization: `Bearer ${token()}`,
+    },
+  });
+  if (res.status === 401) {
+    // Token is invalid or expired — clear so the UI prompts re-auth.
+    clearCachedToken();
+    cachedFileId = null;
+    throw new Error("認証期限切れ。もう一度サインインしてください。");
+  }
+  return res;
+}
+
 async function findFileId() {
   if (cachedFileId) return cachedFileId;
   const q = encodeURIComponent(`name='${DRIVE_FILE_NAME}' and trashed=false`);
   const url = `${FILES_API}?q=${q}&spaces=drive&fields=files(id,name)`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token()}` },
-  });
+  const res = await driveFetch(url);
   if (!res.ok) throw new Error(`Drive list失敗: ${res.status}`);
   const json = await res.json();
   if (json.files && json.files.length > 0) {
@@ -43,12 +58,9 @@ async function createFile(data) {
     body + `\r\n` +
     `--${boundary}--`;
 
-  const res = await fetch(`${UPLOAD_API}?uploadType=multipart`, {
+  const res = await driveFetch(`${UPLOAD_API}?uploadType=multipart`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token()}`,
-      "Content-Type": `multipart/related; boundary=${boundary}`,
-    },
+    headers: { "Content-Type": `multipart/related; boundary=${boundary}` },
     body: multipart,
   });
   if (!res.ok) throw new Error(`Drive create失敗: ${res.status}`);
@@ -58,20 +70,15 @@ async function createFile(data) {
 }
 
 async function readFile(fileId) {
-  const res = await fetch(`${FILES_API}/${fileId}?alt=media`, {
-    headers: { Authorization: `Bearer ${token()}` },
-  });
+  const res = await driveFetch(`${FILES_API}/${fileId}?alt=media`);
   if (!res.ok) throw new Error(`Drive read失敗: ${res.status}`);
   return await res.json();
 }
 
 async function updateFile(fileId, data) {
-  const res = await fetch(`${UPLOAD_API}/${fileId}?uploadType=media`, {
+  const res = await driveFetch(`${UPLOAD_API}/${fileId}?uploadType=media`, {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token()}`,
-      "Content-Type": "application/json; charset=UTF-8",
-    },
+    headers: { "Content-Type": "application/json; charset=UTF-8" },
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`Drive update失敗: ${res.status}`);
@@ -87,7 +94,7 @@ export const driveBackend = {
       return data || { books: [] };
     } catch (e) {
       console.error(e);
-      return { books: [] };
+      throw e;
     }
   },
 

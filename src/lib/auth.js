@@ -4,6 +4,39 @@ import { GOOGLE_CLIENT_ID, DRIVE_SCOPE } from "./config.js";
 export const accessToken = writable(null);
 export const authError = writable(null);
 
+const TOKEN_KEY = "tsundoku.auth.token.v1";
+
+function saveToken(token, expiresInSeconds) {
+  // Subtract 60s buffer so we don't use a token that's about to expire mid-request.
+  const expiresAt = Date.now() + (Number(expiresInSeconds || 3600) - 60) * 1000;
+  try {
+    localStorage.setItem(TOKEN_KEY, JSON.stringify({ token, expiresAt }));
+  } catch (e) {
+    console.warn("Failed to cache token", e);
+  }
+}
+
+function loadCachedToken() {
+  try {
+    const raw = localStorage.getItem(TOKEN_KEY);
+    if (!raw) return null;
+    const { token, expiresAt } = JSON.parse(raw);
+    if (!token || !expiresAt || Date.now() >= expiresAt) {
+      localStorage.removeItem(TOKEN_KEY);
+      return null;
+    }
+    return token;
+  } catch {
+    return null;
+  }
+}
+
+// Called from drive.js when a request returns 401 — token is stale; force re-auth.
+export function clearCachedToken() {
+  try { localStorage.removeItem(TOKEN_KEY); } catch {}
+  accessToken.set(null);
+}
+
 let tokenClient = null;
 let pendingResolve = null;
 
@@ -16,7 +49,6 @@ function waitForGoogle() {
         resolve();
       }
     }, 50);
-    // Give up after 10 seconds
     setTimeout(() => { clearInterval(interval); resolve(); }, 10000);
   });
 }
@@ -38,13 +70,17 @@ export async function initAuth() {
         return;
       }
       authError.set(null);
+      saveToken(response.access_token, response.expires_in);
       accessToken.set(response.access_token);
       if (pendingResolve) { pendingResolve(response.access_token); pendingResolve = null; }
     },
   });
+
+  // Restore cached token if still valid — avoids re-prompting on every reload.
+  const cached = loadCachedToken();
+  if (cached) accessToken.set(cached);
 }
 
-// Trigger interactive sign-in (user clicks button)
 export function signIn() {
   if (!tokenClient) {
     authError.set("認証が初期化されていません。ページを再読み込みしてください。");
@@ -56,19 +92,10 @@ export function signIn() {
   });
 }
 
-// Try silent re-auth (no UI) — works if user previously authorized
-export function trySilentSignIn() {
-  if (!tokenClient) return Promise.resolve(null);
-  return new Promise(resolve => {
-    pendingResolve = resolve;
-    tokenClient.requestAccessToken({ prompt: "" });
-  });
-}
-
 export function signOut() {
   const token = get(accessToken);
   if (token && window.google?.accounts?.oauth2) {
     window.google.accounts.oauth2.revoke(token, () => {});
   }
-  accessToken.set(null);
+  clearCachedToken();
 }

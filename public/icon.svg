@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Background: app primary green -->
+  <rect width="1024" height="1024" fill="#2b7a4b"/>
+
+  <!-- A small stack of book spines, centered. iOS will round the corners. -->
+  <g transform="translate(512 512)">
+    <!-- bottom book (widest, base of the pile) -->
+    <rect x="-340" y="120" width="680" height="130" rx="14" fill="#f5e6c8"/>
+    <rect x="-340" y="120" width="680" height="22" rx="11" fill="#d6b97f"/>
+
+    <!-- middle book -->
+    <rect x="-310" y="-30" width="620" height="130" rx="14" fill="#e58c5a"/>
+    <rect x="-310" y="-30" width="620" height="22" rx="11" fill="#b8623a"/>
+
+    <!-- top book -->
+    <rect x="-280" y="-180" width="560" height="130" rx="14" fill="#7fb3d5"/>
+    <rect x="-280" y="-180" width="560" height="22" rx="11" fill="#4f8ab0"/>
+
+    <!-- tiny bookmark sticking up from the top book -->
+    <rect x="220" y="-220" width="34" height="60" fill="#fff0c8"/>
+  </g>
+</svg>

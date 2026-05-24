@@ -1,0 +1,156 @@
+<script>
+  import { onMount } from "svelte";
+  import BookList from "./components/BookList.svelte";
+  import BookForm from "./components/BookForm.svelte";
+  import BookDetail from "./components/BookDetail.svelte";
+  import { books, loaded, loadAll, addBook, updateBook, discardBook, restoreBook } from "./lib/store.js";
+  import { allTags, parseTags, sortByStatusPriority } from "./lib/book.js";
+
+  let view = $state("list"); // 'list' | 'new' | 'edit' | 'show'
+  let selectedId = $state(null);
+  let filterParams = $state({});
+
+  let toastMessage = $state("");
+  let toastVisible = $state(false);
+  let toastTimer;
+
+  let undoBookId = $state(null);
+  let undoMessage = $state("");
+
+  function showToast(msg) {
+    toastMessage = msg;
+    toastVisible = true;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toastVisible = false; }, 1800);
+  }
+
+  let flashTimer;
+  let flashMessage = $state("");
+  let flashVisible = $state(false);
+
+  function showFlash(msg) {
+    flashMessage = msg;
+    flashVisible = true;
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(() => { flashVisible = false; }, 1800);
+  }
+
+  onMount(loadAll);
+
+  const totalBooks = $derived($books.filter(b => !b.deleted_at).length);
+  const tagList = $derived(allTags($books));
+
+  const filteredBooks = $derived.by(() => {
+    let list = $books.filter(b => !b.deleted_at);
+    if (filterParams.status) list = list.filter(b => b.status === filterParams.status);
+    if (filterParams.fmt) list = list.filter(b => b.format === filterParams.fmt);
+    if (filterParams.tag) list = list.filter(b => parseTags(b.tags_text).includes(filterParams.tag));
+    if (filterParams.missing === "tags") list = list.filter(b => !b.tags_text || b.tags_text.trim() === "");
+    if (filterParams.missing === "format") list = list.filter(b => !b.format || b.format === "");
+    if (filterParams.q) {
+      const q = filterParams.q.toLowerCase();
+      list = list.filter(b => (b.title || "").toLowerCase().includes(q));
+    }
+    return sortByStatusPriority(list);
+  });
+
+  const selectedBook = $derived($books.find(b => b.id === selectedId));
+
+  function handleChangeFilter(params) {
+    if (params.view === "new") { view = "new"; return; }
+    const next = {};
+    if (params.q !== undefined) next.q = params.q;
+    if (params.status) next.status = params.status;
+    if (params.fmt) next.fmt = params.fmt;
+    if (params.tag) next.tag = params.tag;
+    if (params.missing) next.missing = params.missing;
+    filterParams = next;
+  }
+
+  function handleClearFilter() { filterParams = {}; }
+
+  function goToList() {
+    view = "list";
+    selectedId = null;
+  }
+
+  async function handleCreate(data) {
+    await addBook(data);
+    goToList();
+    showFlash("本を登録しました。");
+  }
+
+  async function handleUpdate(data) {
+    if (!selectedId) return;
+    await updateBook(selectedId, data);
+    goToList();
+    showFlash("本を更新しました。");
+  }
+
+  async function handleDelete() {
+    if (!selectedId) return;
+    const id = selectedId;
+    await discardBook(id);
+    undoBookId = id;
+    undoMessage = "本を削除しました。";
+    goToList();
+  }
+
+  async function handleUndo() {
+    if (!undoBookId) return;
+    await restoreBook(undoBookId);
+    undoBookId = null;
+    undoMessage = "";
+    showFlash("削除を取り消しました。");
+  }
+
+  async function handleQuickStatus(newStatus) {
+    if (!selectedId) return;
+    await updateBook(selectedId, { status: newStatus });
+    showToast("ステータスを変更しました。");
+  }
+</script>
+
+<svelte:head>
+  <title>{view === "new" ? "新規登録" : view === "edit" ? "編集" : selectedBook?.title || "積読管理"}</title>
+</svelte:head>
+
+{#if flashVisible && !undoBookId}
+  <p class="flash-notice" class:flash-hidden={!flashVisible}>{flashMessage}</p>
+{/if}
+
+{#if !$loaded}
+  <p>読み込み中...</p>
+{:else if view === "list"}
+  <BookList
+    books={filteredBooks}
+    params={filterParams}
+    {totalBooks}
+    allTagsList={tagList}
+    onShow={(id) => { selectedId = id; view = "show"; }}
+    onChangeFilter={handleChangeFilter}
+    onClearFilter={handleClearFilter}
+    onShowToast={showToast} />
+{:else if view === "new"}
+  <h1>新規登録</h1>
+  <BookForm onSubmit={handleCreate} onCancel={goToList} />
+{:else if view === "edit" && selectedBook}
+  <h1>編集</h1>
+  <BookForm book={selectedBook} onSubmit={handleUpdate} onCancel={() => { view = "show"; }} />
+{:else if view === "show" && selectedBook}
+  <BookDetail
+    book={selectedBook}
+    onEdit={() => { view = "edit"; }}
+    onBack={goToList}
+    onDelete={handleDelete}
+    onStatusChange={handleQuickStatus} />
+{/if}
+
+{#if undoBookId}
+  <div class="undo-banner" role="status">
+    <span>{undoMessage}</span>
+    <button class="btn-undo" onclick={handleUndo}>元に戻す</button>
+  </div>
+{/if}
+
+<div class="toast" class:toast-visible={toastVisible}>{toastMessage}</div>

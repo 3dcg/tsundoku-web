@@ -65,8 +65,8 @@
       <input id="author" type="text" bind:value={author} />
       <p class="hint">著者名。複数いる場合はカンマ区切りでもOK</p>
     </div>
-    <div class="field">
-      <label>形式</label>
+    <div class="field" role="group" aria-labelledby="format-label">
+      <span id="format-label" class="field-label">形式</span>
       <div class="radio-group">
         {#each FORMATS as f}
           <label class="radio-option">
@@ -104,8 +104,8 @@
       {/if}
       <p class="hint">カンマ区切りで自由に。例: プログラミング, キャリア, 思考</p>
     </div>
-    <div class="field">
-      <label>ステータス</label>
+    <div class="field" role="group" aria-labelledby="status-label">
+      <span id="status-label" class="field-label">ステータス</span>
       <div class="radio-group">
         {#each STATUSES as s}
           <label class="radio-option">

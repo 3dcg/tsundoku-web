@@ -544,7 +544,8 @@ a { color: #06c; }
   margin: 0.9em 0;
 }
 .book-form .field:first-of-type { margin-top: 0.3em; }
-.book-form label {
+.book-form label,
+.book-form .field-label {
   display: block;
   font-size: 0.9em;
   color: #444;

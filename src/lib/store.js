@@ -1,25 +1,53 @@
 import { writable, get } from "svelte/store";
-import { createBook, sortByStatusPriority, parseTags } from "./book.js";
+import { createBook, sortByStatusPriority } from "./book.js";
 import { localStorageBackend } from "./storage/local.js";
+import { driveBackend } from "./storage/drive.js";
 import { STATUS_PRIORITY } from "./constants.js";
 
-const backend = localStorageBackend;
+// Backend can be swapped at runtime (local for offline/dev, drive once signed in)
+let backend = localStorageBackend;
+
+export function useDriveBackend() {
+  backend = driveBackend;
+  driveBackend.resetCache?.();
+  loaded.set(false);
+}
+
+export function useLocalBackend() {
+  backend = localStorageBackend;
+  loaded.set(false);
+}
 
 export const books = writable([]);
 export const loaded = writable(false);
+export const syncing = writable(false);
+export const syncError = writable(null);
 
 async function persist() {
-  await backend.save({ books: get(books) });
+  syncing.set(true);
+  syncError.set(null);
+  try {
+    await backend.save({ books: get(books) });
+  } catch (e) {
+    console.error("Save failed", e);
+    syncError.set(e.message || "保存に失敗しました");
+  } finally {
+    syncing.set(false);
+  }
 }
 
 export async function loadAll() {
-  const data = await backend.load();
-  books.set(Array.isArray(data.books) ? data.books : []);
-  loaded.set(true);
-}
-
-export function visibleBooks() {
-  return sortByStatusPriority(get(books).filter(b => !b.deleted_at));
+  syncError.set(null);
+  try {
+    const data = await backend.load();
+    books.set(Array.isArray(data.books) ? data.books : []);
+    loaded.set(true);
+  } catch (e) {
+    console.error("Load failed", e);
+    syncError.set(e.message || "読み込みに失敗しました");
+    books.set([]);
+    loaded.set(true);
+  }
 }
 
 function nextPositionFor(status) {
@@ -42,7 +70,6 @@ export async function updateBook(id, attrs) {
   const old = list[idx];
   const next = { ...old, ...attrs, updated_at: new Date().toISOString() };
 
-  // If status changed, move to end of new status group
   if (attrs.status && attrs.status !== old.status) {
     next.position = nextPositionFor(attrs.status);
   }

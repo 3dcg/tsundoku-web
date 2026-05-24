@@ -7,7 +7,8 @@
   import AppHeader from "./components/AppHeader.svelte";
   import { books, loaded, loadAll, addBook, updateBook, discardBook, restoreBook, useDriveBackend } from "./lib/store.js";
   import { allTags, parseTags, sortByStatusPriority } from "./lib/book.js";
-  import { accessToken, initAuth, signIn, signOut } from "./lib/auth.js";
+  import { accessToken, initAuth, signIn, signOut, trySilentRefresh } from "./lib/auth.js";
+  import { get } from "svelte/store";
 
   let view = $state("list"); // 'list' | 'new' | 'edit' | 'show'
   let selectedId = $state(null);
@@ -39,13 +40,18 @@
   }
 
   let authReady = $state(false);
+  let refreshing = $state(false);
 
   onMount(async () => {
     useDriveBackend();
     await initAuth();
+    // If no cached token, attempt a silent refresh before showing the sign-in screen.
+    if (!get(accessToken)) {
+      refreshing = true;
+      await trySilentRefresh();
+      refreshing = false;
+    }
     authReady = true;
-    // initAuth restores a cached token from localStorage if still valid,
-    // so the user usually skips the sign-in screen on reloads.
   });
 
   // When access token becomes available, load data from Drive
@@ -149,8 +155,8 @@
   <title>{view === "new" ? "新規登録" : view === "edit" ? "編集" : selectedBook?.title || "積読管理"}</title>
 </svelte:head>
 
-{#if !authReady}
-  <p style="text-align: center; margin-top: 4em; color: #888;">読み込み中...</p>
+{#if !authReady || refreshing}
+  <p style="text-align: center; margin-top: 4em; color: #888;">サインイン状態を確認中…</p>
 {:else if !$accessToken}
   <SignIn onSignIn={handleSignIn} />
 {:else}

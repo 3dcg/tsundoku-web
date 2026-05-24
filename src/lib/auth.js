@@ -92,6 +92,33 @@ export function signIn() {
   });
 }
 
+// Silent token refresh — uses the existing Google session in the browser.
+// Succeeds invisibly if the user is signed in to Google AND has previously
+// granted consent to this app. Falls through (resolves null) if not.
+// We bound it by a timeout so the UI doesn't hang if the silent flow stalls.
+export function trySilentRefresh(timeoutMs = 3000) {
+  if (!tokenClient) return Promise.resolve(null);
+  return new Promise(resolve => {
+    let done = false;
+    const finish = (token) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (pendingResolve === resolver) pendingResolve = null;
+      resolve(token);
+    };
+    const resolver = (token) => finish(token);
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    pendingResolve = resolver;
+    try {
+      tokenClient.requestAccessToken({ prompt: "" });
+    } catch (e) {
+      console.warn("Silent re-auth threw", e);
+      finish(null);
+    }
+  });
+}
+
 export function signOut() {
   const token = get(accessToken);
   if (token && window.google?.accounts?.oauth2) {

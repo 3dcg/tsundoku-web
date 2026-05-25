@@ -1,5 +1,4 @@
-import { get } from "svelte/store";
-import { accessToken, clearCachedToken } from "../auth.js";
+import { ensureFreshToken, clearCachedToken } from "../auth.js";
 import { DRIVE_FILE_NAME } from "../config.js";
 
 const FILES_API = "https://www.googleapis.com/drive/v3/files";
@@ -7,22 +6,21 @@ const UPLOAD_API = "https://www.googleapis.com/upload/drive/v3/files";
 
 let cachedFileId = null;
 
-function token() {
-  const t = get(accessToken);
-  if (!t) throw new Error("アクセストークンがありません。サインインしてください。");
-  return t;
-}
-
 async function driveFetch(url, options = {}) {
+  // Drive を叩く前に必ずトークン状態を確認。期限切れ間近なら refresh で更新。
+  const t = await ensureFreshToken();
+  if (!t) throw new Error("アクセストークンがありません。サインインしてください。");
+
   const res = await fetch(url, {
     ...options,
     headers: {
       ...(options.headers || {}),
-      Authorization: `Bearer ${token()}`,
+      Authorization: `Bearer ${t}`,
     },
   });
   if (res.status === 401) {
-    // Token is invalid or expired — clear so the UI prompts re-auth.
+    // ensureFreshToken済みなのに401 → refresh_token自体が無効化された可能性。
+    // 全部クリアして再ログインを促す。
     clearCachedToken();
     cachedFileId = null;
     throw new Error("認証期限切れ。もう一度サインインしてください。");

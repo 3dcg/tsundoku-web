@@ -7,7 +7,7 @@
   import AppHeader from "./components/AppHeader.svelte";
   import { books, loaded, loadAll, addBook, updateBook, discardBook, restoreBook, useDriveBackend } from "./lib/store.js";
   import { allTags, parseTags, sortByStatusPriority } from "./lib/book.js";
-  import { accessToken, initAuth, signIn, signOut, trySilentRefresh } from "./lib/auth.js";
+  import { accessToken, initAuth, signIn, signOut } from "./lib/auth.js";
   import { get } from "svelte/store";
 
   let view = $state("list"); // 'list' | 'new' | 'edit' | 'show'
@@ -40,17 +40,14 @@
   }
 
   let authReady = $state(false);
-  let refreshing = $state(false);
 
   onMount(async () => {
     useDriveBackend();
+    // initAuth() が以下を全部やってくれる:
+    //  - URLに?code=があればPKCE交換でトークン取得
+    //  - キャッシュ済みアクセストークンが生きていれば復元
+    //  - 期限切れならrefresh_tokenで自動更新
     await initAuth();
-    // If no cached token, attempt a silent refresh before showing the sign-in screen.
-    if (!get(accessToken)) {
-      refreshing = true;
-      await trySilentRefresh();
-      refreshing = false;
-    }
     authReady = true;
   });
 
@@ -62,10 +59,9 @@
   });
 
   async function handleSignIn() {
-    const token = await signIn();
-    if (token) {
-      // loadAll will be triggered by the $effect
-    }
+    // signIn()はGoogleへフルリダイレクトするので、この関数のあとは戻ってこない。
+    // 戻ってきたとき(?code=付きで)はinitAuth()がトークン交換まで処理する。
+    await signIn();
   }
 
   function handleSignOut() {
@@ -155,7 +151,7 @@
   <title>{view === "new" ? "新規登録" : view === "edit" ? "編集" : selectedBook?.title || "積読管理"}</title>
 </svelte:head>
 
-{#if !authReady || refreshing}
+{#if !authReady}
   <p style="text-align: center; margin-top: 4em; color: #888;">サインイン状態を確認中…</p>
 {:else if !$accessToken}
   <SignIn onSignIn={handleSignIn} />

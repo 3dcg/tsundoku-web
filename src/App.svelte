@@ -44,9 +44,8 @@
   onMount(async () => {
     useDriveBackend();
     // initAuth() が以下を全部やってくれる:
-    //  - URLに?code=があればPKCE交換でトークン取得
     //  - キャッシュ済みアクセストークンが生きていれば復元
-    //  - 期限切れならrefresh_tokenで自動更新
+    //  - 期限切れ & 過去にサインイン済みなら GIS で無音(prompt:"")再取得
     await initAuth();
     authReady = true;
   });
@@ -59,8 +58,8 @@
   });
 
   async function handleSignIn() {
-    // signIn()はGoogleへフルリダイレクトするので、この関数のあとは戻ってこない。
-    // 戻ってきたとき(?code=付きで)はinitAuth()がトークン交換まで処理する。
+    // signIn()はGISのポップアップで同意を取る。成功すると accessToken ストアが更新され、
+    // 上の $effect が発火して loadAll() が走る。
     await signIn();
   }
 

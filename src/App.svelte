@@ -8,6 +8,7 @@
   import { books, loaded, loadAll, addBook, updateBook, discardBook, restoreBook, useDriveBackend } from "./lib/store.js";
   import { allTags, parseTags, sortByStatusPriority } from "./lib/book.js";
   import { accessToken, initAuth, signIn, signOut } from "./lib/auth.js";
+  import { updateAvailable, startUpdateWatcher, reloadApp } from "./lib/version.js";
   import { get } from "svelte/store";
 
   let view = $state("list"); // 'list' | 'new' | 'edit' | 'show'
@@ -49,6 +50,7 @@
   let authReady = $state(false);
 
   onMount(async () => {
+    startUpdateWatcher();
     useDriveBackend();
     // initAuth() が以下を全部やってくれる:
     //  - キャッシュ済みアクセストークンが生きていれば復元
@@ -159,6 +161,13 @@
 <svelte:head>
   <title>{view === "new" ? "新規登録" : view === "edit" ? "編集" : selectedBook?.title || "積読管理"}</title>
 </svelte:head>
+
+{#if $updateAvailable}
+  <div class="update-banner" role="status">
+    <span>新しいバージョンがあります。</span>
+    <button class="btn-update" onclick={reloadApp}>更新する</button>
+  </div>
+{/if}
 
 {#if !authReady}
   <p style="text-align: center; margin-top: 4em; color: #888;">サインイン状態を確認中…</p>

@@ -215,6 +215,32 @@ a { color: #06c; }
   transform: translateY(-6px);
 }
 
+/* Update banner — shown when a newer build is detected on the server */
+.update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9em;
+  flex-wrap: wrap;
+  background: #2b7a4b;
+  color: #fff;
+  padding: 0.6em 1em;
+  border-radius: 6px;
+  margin-bottom: 1em;
+  font-size: 0.95em;
+}
+.btn-update {
+  background: #fff;
+  color: #2b7a4b;
+  border: none;
+  padding: 0.4em 1em;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.btn-update:hover { background: #eef7f0; }
+
 /* Undo banner (after destroy, with restore button) */
 .undo-banner {
   position: fixed;

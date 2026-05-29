@@ -14,6 +14,7 @@
   let tags_text = $state(book?.tags_text || "");
   let memo = $state(book?.memo || "");
   let errors = $state([]);
+  let submitting = $state(false);
 
   const existingTags = $derived(allTags($books));
 
@@ -36,12 +37,19 @@
     return currentTagList().includes(tag);
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    if (submitting) return;
     const data = { title, author, why_wanted, format, status, tags_text, memo };
     errors = validateBook(data);
     if (errors.length > 0) return;
-    onSubmit?.(data);
+    submitting = true;
+    try {
+      await onSubmit?.(data);
+    } catch (err) {
+      submitting = false;
+      throw err;
+    }
   }
 </script>
 
@@ -127,7 +135,9 @@
   </fieldset>
 
   <div class="form-actions">
-    <button type="button" class="btn-link" onclick={onCancel}>戻る</button>
-    <button type="submit" class="btn-primary">{book ? "更新する" : "登録する"}</button>
+    <button type="button" class="btn-link" onclick={onCancel} disabled={submitting}>戻る</button>
+    <button type="submit" class="btn-primary" disabled={submitting}>
+      {submitting ? "保存中…" : book ? "更新する" : "登録する"}
+    </button>
   </div>
 </form>

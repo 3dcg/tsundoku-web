@@ -20,6 +20,13 @@
 
   let undoBookId = $state(null);
   let undoMessage = $state("");
+  let undoTimer;
+
+  function clearUndo() {
+    clearTimeout(undoTimer);
+    undoBookId = null;
+    undoMessage = "";
+  }
 
   function showToast(msg) {
     toastMessage = msg;
@@ -92,6 +99,7 @@
   const selectedBook = $derived($books.find(b => b.id === selectedId));
 
   function handleChangeFilter(params) {
+    clearUndo();
     if (params.view === "new") { view = "new"; return; }
     const next = {};
     if (params.q !== undefined) next.q = params.q;
@@ -128,14 +136,16 @@
     await discardBook(id);
     undoBookId = id;
     undoMessage = "本を削除しました。";
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(clearUndo, 6000);
     goToList();
   }
 
   async function handleUndo() {
     if (!undoBookId) return;
-    await restoreBook(undoBookId);
-    undoBookId = null;
-    undoMessage = "";
+    const id = undoBookId;
+    clearUndo();
+    await restoreBook(id);
     showFlash("削除を取り消しました。");
   }
 
@@ -169,7 +179,7 @@
       params={filterParams}
       {totalBooks}
       allTagsList={tagList}
-      onShow={(id) => { selectedId = id; view = "show"; }}
+      onShow={(id) => { clearUndo(); selectedId = id; view = "show"; }}
       onChangeFilter={handleChangeFilter}
       onClearFilter={handleClearFilter}
       onShowToast={showToast} />
@@ -192,6 +202,7 @@
     <div class="undo-banner" role="status">
       <span>{undoMessage}</span>
       <button class="btn-undo" onclick={handleUndo}>元に戻す</button>
+      <button class="btn-undo-close" aria-label="閉じる" onclick={clearUndo}>×</button>
     </div>
   {/if}
 

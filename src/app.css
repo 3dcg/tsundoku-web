@@ -237,6 +237,16 @@ a { color: #06c; }
   font-weight: bold;
 }
 .btn-undo:hover { background: #ffe48a; color: #2b3a55; }
+.btn-undo-close {
+  background: transparent;
+  color: #cdd5e0;
+  border: none;
+  font-size: 1.3em;
+  line-height: 1;
+  padding: 0.1em 0.3em;
+  cursor: pointer;
+}
+.btn-undo-close:hover { color: #fff; }
 
 /* Quick status changer on detail page */
 .bd-quick-status {
@@ -610,7 +620,33 @@ a { color: #06c; }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 0.8em;
   margin-top: 1.2em;
+}
+.form-actions .btn-primary {
+  padding: 0.7em 1.4em;
+  font-size: 1em;
+}
+
+/* On phones, keep the save button within thumb reach and big enough to tap */
+@media (max-width: 600px) {
+  .book-form .form-actions {
+    position: sticky;
+    bottom: 0;
+    margin-top: 1.4em;
+    padding: 0.7em 0;
+    background: linear-gradient(to top, #fff 72%, rgba(255, 255, 255, 0));
+    z-index: 50;
+  }
+  .form-actions .btn-primary {
+    flex: 1;
+    text-align: center;
+    padding: 0.95em 1.2em;
+    font-size: 1.05em;
+  }
+  .form-actions .btn-link {
+    padding: 0.95em 0.6em;
+  }
 }
 /* Radio group: shown as clickable pill buttons */
 .radio-group {

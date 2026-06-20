@@ -411,16 +411,17 @@ a { color: #06c; }
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
+  width: 56px;
   align-self: stretch;
+  padding: 4px;
   background: #f0f0f2;
   border-right: 1px solid #eaeaea;
   overflow: hidden;
 }
 .book-card .bc-cover img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
   display: block;
 }
 .book-card .bc-cover-fallback {

@@ -52,8 +52,12 @@ export async function fetchCover(title, author) {
   let url = null;
   try {
     const q = encodeURIComponent(buildQuery(title, author));
+    // An API key is required for reliable quota; keyless requests share a tiny
+    // global anonymous quota and quickly return 429. Injected at build time.
+    const key = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+    const keyParam = key ? `&key=${key}` : "";
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${q}&country=JP&maxResults=1`,
+      `https://www.googleapis.com/books/v1/volumes?q=${q}&country=JP&maxResults=1${keyParam}`,
     );
     if (res.ok) {
       const data = await res.json();

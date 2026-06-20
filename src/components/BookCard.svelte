@@ -1,6 +1,7 @@
 <script>
   import { FORMAT_LABEL } from "../lib/constants.js";
   import { fetchCover } from "../lib/cover.js";
+  import { ndlThumbnail } from "../lib/isbn.js";
   let { book, onShow } = $props();
 
   function truncate(str, len) {
@@ -8,17 +9,26 @@
     return str.length > len ? str.slice(0, len) + "..." : str;
   }
 
-  // Look up the cover whenever title/author changes.
-  let coverUrl = $state(null);
+  // Cover candidates tried in order; advance to the next on image load error.
+  // 1) NDL thumbnail (by ISBN, best for 和書) 2) Google Books (by title/author).
+  let candidates = $state([]);
+  let idx = $state(0);
+  const coverUrl = $derived(candidates[idx] ?? null);
+
   $effect(() => {
-    const { title, author } = book;
-    coverUrl = null;
+    const { title, author, isbn } = book;
+    idx = 0;
+    candidates = isbn ? [ndlThumbnail(isbn)].filter(Boolean) : [];
     let cancelled = false;
     fetchCover(title, author).then(url => {
-      if (!cancelled) coverUrl = url;
+      if (!cancelled && url) candidates = [...candidates, url];
     });
     return () => { cancelled = true; };
   });
+
+  function onCoverError() {
+    idx += 1; // fall through to the next candidate (or placeholder when exhausted)
+  }
 </script>
 
 <div class="book-card" data-book-id={book.id}>
@@ -26,7 +36,7 @@
 
   <div class="bc-cover" class:has-image={coverUrl}>
     {#if coverUrl}
-      <img src={coverUrl} alt="" loading="lazy" />
+      <img src={coverUrl} alt="" loading="lazy" onerror={onCoverError} />
     {:else}
       <span class="bc-cover-fallback" aria-hidden="true">📖</span>
     {/if}

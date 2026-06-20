@@ -39,6 +39,9 @@
     {#if book.author}
       <dt>著者</dt><dd>{book.author}</dd>
     {/if}
+    {#if book.isbn}
+      <dt>ISBN</dt><dd>{book.isbn}</dd>
+    {/if}
     {#if book.why_wanted}
       <dt>なぜ読みたかったか</dt><dd>{nl2br(book.why_wanted)}</dd>
     {/if}

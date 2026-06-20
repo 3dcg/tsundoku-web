@@ -3,11 +3,40 @@
   import { allTags } from "../lib/book.js";
   import { books } from "../lib/store.js";
   import { validateBook } from "../lib/book.js";
+  import { fetchBookByIsbn, isValidIsbn } from "../lib/isbn.js";
 
   let { book, onSubmit, onCancel } = $props();
 
+  let isbn = $state(book?.isbn || "");
   let title = $state(book?.title || "");
   let author = $state(book?.author || "");
+  let isbnLoading = $state(false);
+  let isbnMsg = $state("");
+
+  async function lookupIsbn() {
+    if (isbnLoading) return;
+    if (!isValidIsbn(isbn)) {
+      isbnMsg = "ISBNは10桁または13桁で入力してください";
+      return;
+    }
+    isbnLoading = true;
+    isbnMsg = "";
+    try {
+      const info = await fetchBookByIsbn(isbn);
+      if (!info) {
+        isbnMsg = "この ISBN の書誌が見つかりませんでした";
+        return;
+      }
+      if (info.title) title = info.title;
+      if (info.author) author = info.author;
+      isbn = info.isbn;
+      isbnMsg = `取得しました: ${info.title}`;
+    } catch (e) {
+      isbnMsg = "取得に失敗しました（通信エラー）";
+    } finally {
+      isbnLoading = false;
+    }
+  }
   let why_wanted = $state(book?.why_wanted || "");
   let format = $state(book?.format || "");
   let status = $state(book?.status || "unread");
@@ -40,7 +69,7 @@
   async function handleSubmit(e) {
     e.preventDefault();
     if (submitting) return;
-    const data = { title, author, why_wanted, format, status, tags_text, memo };
+    const data = { isbn, title, author, why_wanted, format, status, tags_text, memo };
     errors = validateBook(data);
     if (errors.length > 0) return;
     submitting = true;
@@ -63,6 +92,18 @@
 
   <fieldset>
     <legend>基本情報</legend>
+    <div class="field">
+      <label for="isbn">ISBN</label>
+      <div class="isbn-row">
+        <input id="isbn" type="text" inputmode="numeric" bind:value={isbn}
+               placeholder="978…" />
+        <button type="button" class="btn-secondary" onclick={lookupIsbn} disabled={isbnLoading}>
+          {isbnLoading ? "取得中…" : "書誌を取得"}
+        </button>
+      </div>
+      {#if isbnMsg}<p class="hint isbn-msg">{isbnMsg}</p>{/if}
+      <p class="hint">裏表紙のISBNを入れて「書誌を取得」すると、タイトル・著者を自動入力します（openBD）</p>
+    </div>
     <div class="field">
       <label for="title">タイトル <span class="required-mark">必須</span></label>
       <input id="title" type="text" bind:value={title} required />

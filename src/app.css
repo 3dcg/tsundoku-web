@@ -576,6 +576,16 @@ a { color: #06c; }
   cursor: pointer;
 }
 .btn-secondary:hover { background: #dde3ec; }
+.btn-secondary:disabled { opacity: 0.6; cursor: default; }
+
+.isbn-row {
+  display: flex;
+  gap: 0.5em;
+  align-items: stretch;
+}
+.isbn-row input { flex: 1; min-width: 0; }
+.isbn-row .btn-secondary { white-space: nowrap; flex-shrink: 0; }
+.isbn-msg { color: #2b3a55; font-weight: 500; }
 
 /* Danger zone — separated visually so destroy isn't a misclick */
 .danger-zone {

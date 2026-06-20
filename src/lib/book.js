@@ -11,6 +11,7 @@ export function createBook(attrs = {}) {
     id: attrs.id || newId(),
     title: attrs.title || "",
     author: attrs.author || "",
+    isbn: attrs.isbn || "",
     why_wanted: attrs.why_wanted || "",
     format: attrs.format || "",
     status: attrs.status || DEFAULT_STATUS,

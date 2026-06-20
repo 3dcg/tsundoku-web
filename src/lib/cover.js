@@ -54,22 +54,25 @@ export async function fetchCover(title, author) {
     const q = encodeURIComponent(buildQuery(title, author));
     // An API key is required for reliable quota; keyless requests share a tiny
     // global anonymous quota and quickly return 429. Injected at build time.
-    const key = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
-    const keyParam = key ? `&key=${key}` : "";
+    const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_KEY;
+    const keyParam = apiKey ? `&key=${apiKey}` : "";
     const res = await fetch(
       `https://www.googleapis.com/books/v1/volumes?q=${q}&country=JP&maxResults=1${keyParam}`,
     );
-    if (res.ok) {
-      const data = await res.json();
-      const links = data.items?.[0]?.volumeInfo?.imageLinks;
-      const raw = links?.thumbnail || links?.smallThumbnail;
-      if (raw) url = raw.replace(/^http:/, "https:");
+    if (!res.ok) {
+      // 429 (quota) / 5xx are transient — don't cache, so it retries next load.
+      return null;
     }
+    const data = await res.json();
+    const links = data.items?.[0]?.volumeInfo?.imageLinks;
+    const raw = links?.thumbnail || links?.smallThumbnail;
+    if (raw) url = raw.replace(/^http:/, "https:");
   } catch {
     // Network/offline — leave url null, do not poison the cache permanently.
     return null;
   }
 
+  // Only a real "no cover found" answer gets cached (incl. negative TTL).
   store[key] = { url, at: Date.now() };
   saveCache();
   return url;

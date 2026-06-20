@@ -2,7 +2,8 @@
 // Results are cached in localStorage (keyed by title|author) so we neither
 // refetch on every render nor bloat the Drive-synced book data with URLs.
 
-const CACHE_KEY = "tsundoku.covers.v1";
+// Bump the version to discard a stale cache (e.g. one polluted by 429 misses).
+const CACHE_KEY = "tsundoku.covers.v2";
 // Re-try a "not found" lookup after this long (covers get added over time).
 const MISS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 

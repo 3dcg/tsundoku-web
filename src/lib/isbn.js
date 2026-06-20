@@ -11,6 +11,26 @@ export function isValidIsbn(isbn) {
   return n.length === 10 || n.length === 13;
 }
 
+// Convert a 978-prefixed ISBN-13 to ISBN-10 (recomputing the check digit).
+// Returns the input unchanged if already 10 digits, or null if not convertible.
+export function isbn13to10(isbn) {
+  const n = normalizeIsbn(isbn);
+  if (n.length === 10) return n;
+  if (n.length !== 13 || !n.startsWith("978")) return null;
+  const core = n.slice(3, 12);
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += (10 - i) * Number(core[i]);
+  const c = (11 - (sum % 11)) % 11;
+  return core + (c === 10 ? "X" : String(c));
+}
+
+// Amazon cover image keyed by ISBN-10. Best 和書 coverage, but missing titles
+// return a 1×1 placeholder gif — callers must check naturalWidth, not just error.
+export function amazonCover(isbn) {
+  const i10 = isbn13to10(isbn);
+  return i10 ? `https://images-na.ssl-images-amazon.com/images/P/${i10}.jpg` : null;
+}
+
 // NDL thumbnail is a deterministic URL keyed by ISBN. It may 403 for some
 // books/clients, so callers should treat a load error as "no cover here".
 export function ndlThumbnail(isbn) {

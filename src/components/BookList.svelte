@@ -39,9 +39,9 @@
     const instance = Sortable.create(node, {
       animation: 150,
       ghostClass: "drag-ghost",
-      // Only the explicit handle starts a drag — the rest of the card stays
+      // The cover thumbnail is the drag handle — the rest of the card stays
       // tappable for navigation, and the card itself doesn't intercept scroll.
-      handle: ".bc-drag-handle",
+      handle: ".bc-cover",
       touchStartThreshold: 5,
       onEnd: async () => {
         const ids = Array.from(node.querySelectorAll("[data-book-id]")).map(el => el.dataset.bookId);
@@ -61,6 +61,7 @@
   }
 </script>
 
+<div class="manuscript">
 <div class="page-header">
   <h1>
     積読一覧
@@ -69,7 +70,7 @@
     {/if}
     <span class="page-header-count">({books.length}冊)</span>
   </h1>
-  <a href="#new" class="btn-primary" onclick={(e) => { e.preventDefault(); onChangeFilter?.({ view: 'new' }); }}>+ 新しい本を登録</a>
+  <a href="#new" class="btn-register" onclick={(e) => { e.preventDefault(); onChangeFilter?.({ view: 'new' }); }}>＋ 新しい本を登録</a>
 </div>
 
 {#if totalBooks > 0}
@@ -143,3 +144,4 @@
     </section>
   {/each}
 {/if}
+</div>

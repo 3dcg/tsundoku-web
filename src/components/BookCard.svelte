@@ -9,6 +9,18 @@
     return str.length > len ? str.slice(0, len) + "..." : str;
   }
 
+  // Deterministic "jacket" color for the cover fallback (stable per book).
+  const JACKETS = [
+    "#4f6149", "#354a5f", "#b1543a", "#b8862f",
+    "#3f6360", "#774352", "#c2683f", "#6f6e36",
+  ];
+  const jacket = $derived.by(() => {
+    const seed = book.isbn || book.title || "";
+    let h = 0;
+    for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+    return JACKETS[h % JACKETS.length];
+  });
+
   // Cover candidates tried in order; advance to the next on load error / dud.
   // By ISBN: 1) Amazon 2) NDL thumbnail. Then Google Books (by title/author).
   let candidates = $state([]);
@@ -36,13 +48,12 @@
 </script>
 
 <div class="book-card" data-book-id={book.id}>
-  <div class="bc-drag-handle" aria-label="ドラッグして並び替え">⋮⋮</div>
-
-  <div class="bc-cover" class:has-image={coverUrl}>
+  <div class="bc-cover" class:has-image={coverUrl} title="ドラッグで並び替え"
+       aria-label="ドラッグして並び替え" style={coverUrl ? null : `background:${jacket}`}>
     {#if coverUrl}
-      <img src={coverUrl} alt="" loading="lazy" onerror={next} onload={onCoverLoad} />
+      <img src={coverUrl} alt="" loading="lazy" draggable="false" onerror={next} onload={onCoverLoad} />
     {:else}
-      <span class="bc-cover-fallback" aria-hidden="true">📖</span>
+      <span class="bc-cover-title">{book.title}</span>
     {/if}
   </div>
 
@@ -63,7 +74,7 @@
     {/if}
 
     {#if book.why_wanted}
-      <div class="bc-why">{truncate(book.why_wanted, 50)}</div>
+      <div class="bc-why">「{truncate(book.why_wanted, 50)}」</div>
     {/if}
   </div>
 </div>

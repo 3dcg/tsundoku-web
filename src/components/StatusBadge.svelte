@@ -3,4 +3,4 @@
   let { status } = $props();
 </script>
 
-<span class="status-badge s-{status}">{STATUS_LABEL[status]}</span>
+<span class="status-badge s-{status}"><span class="sb-dot" aria-hidden="true"></span>{STATUS_LABEL[status]}</span>

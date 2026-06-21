@@ -1,19 +1,46 @@
 /*
  * Application-wide styles.
+ *
+ * Visual direction: "縦書き原稿 / Manuscript" — cream paper, vermilion (朱)
+ * margin rule, Mincho serif, thin rules, generous whitespace.
+ *
+ * Tokens:
+ *   paper #faf4e8 · card #fdf8ee · ink #2c2722 · ink-2 #6b6256
+ *   tan #a08f73 · tan-muted #9a8c79/#a99c86 · vermilion(朱) #b1543a
+ *   card-border #ebddc2 · section-rule #e6d6b6
+ *   serif: "Zen Old Mincho" · vertical: "Shippori Mincho B1" · ui: "Zen Kaku Gothic New"
  */
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
-  max-width: 1200px;
-  margin: 1em auto;
-  padding: 0 1em;
-  color: #222;
+  font-family: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 1.4em 1em 3em;
+  background: #faf4e8;
+  color: #2c2722;
   line-height: 1.5;
 }
 
-h1 { margin: 0; }
+h1 { margin: 0; font-family: "Zen Old Mincho", serif; }
 
-a { color: #06c; }
+a { color: #b1543a; }
+
+/* Manuscript margin rule — two thin vermilion vertical lines near the left
+   edge of the list column; all content is indented to the right of them. */
+.manuscript {
+  position: relative;
+  padding: 0 30px 28px 66px;
+}
+.manuscript::before,
+.manuscript::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+.manuscript::before { left: 46px; background: #d49a86; }
+.manuscript::after  { left: 50px; background: #ecc4b4; }
 
 /* Page header with action button */
 .page-header {
@@ -21,33 +48,54 @@ a { color: #06c; }
   justify-content: space-between;
   align-items: center;
   gap: 1em;
-  margin-bottom: 1em;
+  margin-bottom: 1.1em;
   flex-wrap: wrap;
-  background: #e6f0e9;
-  border-radius: 8px;
-  padding: 0.9em 1.2em;
 }
 .page-header h1 {
   display: flex;
   align-items: baseline;
   gap: 0.4em;
   flex-wrap: wrap;
+  font-size: 27px;
+  font-weight: 700;
+  color: #2c2722;
+  letter-spacing: 2px;
 }
 .page-header-filter {
-  font-size: 0.6em;
-  color: #555;
+  font-size: 13px;
+  color: #b1543a;
   font-weight: normal;
+  letter-spacing: 0;
 }
 .page-header-count {
-  font-size: 0.55em;
-  color: #888;
+  font-size: 13px;
+  color: #a08f73;
   font-weight: normal;
+  letter-spacing: 0;
 }
+
+/* Register action — outline 朱 button (low radius, paper-like) */
+.btn-register {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #b1543a !important;
+  font-weight: 700;
+  font-size: 13px;
+  border: 1px solid #d9a08c;
+  border-radius: 4px;
+  padding: 8px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-register:hover { background: #f6e9df; }
 
 /* Drag hint */
 .drag-hint {
-  font-size: 0.78em;
-  color: #888;
+  font-size: 11px;
+  color: #a99c86;
   margin: 0 0 0.6em;
   text-align: right;
 }
@@ -56,11 +104,12 @@ a { color: #06c; }
 .empty-state {
   text-align: center;
   padding: 3em 1em;
-  color: #555;
+  color: #6b6256;
 }
 .empty-state h2 {
+  font-family: "Zen Old Mincho", serif;
   font-size: 1.2em;
-  color: #333;
+  color: #2c2722;
   margin-bottom: 0.5em;
 }
 .empty-state p { margin: 0.5em 0 1.5em; }
@@ -69,135 +118,153 @@ a { color: #06c; }
   font-size: 1.05em;
 }
 
-/* Primary action button */
+/* Primary action button (form save / main CTA) — solid 朱 */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #2b7a4b;
+  background: #b1543a;
   color: #fff !important;
   padding: 0.55em 1.2em;
   font-size: 0.95em;
   line-height: 1.4;
-  border: 1px solid #2b7a4b;
-  border-radius: 6px;
+  border: 1px solid #b1543a;
+  border-radius: 4px;
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 .btn-primary:hover {
-  background: #225f3a;
+  background: #964530;
 }
 
-/* Filter form (search + tag) */
+/* Search row — borderless underlined field + 朱-underlined link */
 .filter-form {
   display: flex;
-  gap: 0.6em;
+  gap: 0.8em;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 0.5em;
+  margin-bottom: 0.8em;
 }
-.filter-form input[type="text"],
-.filter-form select {
-  padding: 0.4em 0.6em;
-  border: 1px solid #c5c5c5;
-  border-radius: 4px;
-  font-size: 0.95em;
+.filter-form input[type="text"] {
+  flex: 1;
+  max-width: 300px;
+  padding: 6px 2px;
+  border: none;
+  border-bottom: 1px solid #d9c7a4;
+  border-radius: 0;
+  font-size: 12px;
   font-family: inherit;
-  background: #fff;
+  background: transparent;
+  color: #2c2722;
 }
-.filter-form input[type="submit"] {
-  padding: 0.4em 0.9em;
-  border: 1px solid #c5c5c5;
-  border-radius: 4px;
-  background: #f3f3f3;
+.filter-form input[type="text"]::placeholder { color: #a99c86; }
+.filter-form input[type="text"]:focus {
+  outline: none;
+  border-bottom-color: #b1543a;
+}
+.filter-form button[type="submit"] {
+  padding: 0 0 3px;
+  border: none;
+  border-bottom: 1px solid #b1543a;
+  border-radius: 0;
+  background: transparent;
+  color: #b1543a;
+  font-size: 12px;
+  font-family: inherit;
   cursor: pointer;
 }
-.filter-form input[type="submit"]:hover { background: #e6e6e6; }
 
-/* Filter nav */
-.filter-nav { color: #555; margin: 0.5em 0 1em; }
+/* Filter nav — editorial text "tabs", active gets a 朱 underline */
+.filter-nav { color: #9a8c79; margin: 0.4em 0 1em; }
 .filter-nav > div {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.2em;
-  margin: 0.25em 0;
+  gap: 14px;
+  margin: 0.4em 0;
 }
 .filter-nav .fn-label {
-  font-size: 0.85em;
-  color: #777;
-  margin-right: 0.4em;
-  min-width: 4.5em;
+  font-size: 11px;
+  color: #9a8c79;
+  margin-right: 0;
+  min-width: 3.6em;
 }
 
-/* Status badge — shared between detail header and card */
-.status-badge {
+/* Filter "tabs" (re-using .filter-pill markup as editorial text) */
+.filter-pill {
   display: inline-block;
-  font-size: 0.78em;
-  padding: 0.1em 0.6em;
-  border-radius: 999px;
-  background: #ccc;
-  color: #fff;
+  padding: 0 0 2px;
+  font-size: 13px;
+  background: transparent;
+  color: #a08f73 !important;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  text-decoration: none;
+}
+.filter-pill:hover { color: #2c2722 !important; }
+.filter-pill.active {
+  color: #2c2722 !important;
+  border-bottom-color: #b1543a;
+  font-weight: 500;
+}
+
+/* Status badge — section name + colored dot (shared with detail header) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: "Zen Old Mincho", serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #2c2722;
   white-space: nowrap;
 }
-.status-badge.s-unread { background: #888; }
-.status-badge.s-reading_first_half { background: #e8a33d; }
-.status-badge.s-reading_second_half { background: #d97339; }
-.status-badge.s-finished { background: #5a8f4e; }
+.status-badge .sb-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9a8a72;
+  flex-shrink: 0;
+}
+.status-badge.s-unread .sb-dot { background: #9a8a72; }
+.status-badge.s-reading_first_half .sb-dot { background: #cda03e; }
+.status-badge.s-reading_second_half .sb-dot { background: #c4703a; }
+.status-badge.s-finished .sb-dot { background: #7d8a4e; }
 
 /* Status sections (each is an independent sortable group) */
 .status-section {
-  margin: 1.2em 0;
+  margin: 1.3em 0;
 }
 .status-section-title {
   display: flex;
-  align-items: center;
-  gap: 0.5em;
-  font-size: 1em;
-  margin: 0 0 0.5em;
-  color: #444;
-}
-.status-section-title .status-badge {
-  font-size: 0.9em;
-  padding: 0.2em 0.8em;
+  align-items: baseline;
+  gap: 10px;
+  margin: 10px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e6d6b6;
 }
 .status-section-count {
-  font-size: 0.85em;
-  color: #888;
+  font-size: 11px;
+  color: #a99c86;
 }
 
-/* Each status group is a 4-col-ish grid */
+/* Card grid per section — at least ~4 across on a normal window, more as it
+   widens (auto-fill packs columns to the available width). */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 0.7em;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
 }
 
 /* Drag handle on the LEFT — large enough to tap on mobile (44pt) and
    touch-action: none prevents the browser from interpreting touch as scroll. */
-.book-card .bc-drag-handle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 32px;
-  align-self: stretch;
-  padding: 0 0.3em;
-  color: #bbb;
-  font-size: 1.1em;
-  letter-spacing: -3px;
-  user-select: none;
-  cursor: grab;
-  touch-action: none;
-  border-right: 1px dashed #e5e5e5;
-}
-.book-card .bc-drag-handle:active { cursor: grabbing; }
-.book-card:hover .bc-drag-handle { color: #888; }
 .drag-ghost {
   opacity: 0.4;
-  background: #fff8e1 !important;
-  border-color: #e8a33d !important;
+  background: #f3ead7 !important;
+  border-color: #d9a08c !important;
 }
 
 /* Flash notice (top of page, from Rails flash[:notice]) */
@@ -350,33 +417,33 @@ a { color: #06c; }
 /* Mobile / narrow-screen adjustments */
 @media (max-width: 600px) {
   body {
-    margin: 0.5em auto;
-    padding: 0 0.6em;
+    margin: 0 auto;
+    padding: 1em 0.6em 2.4em;
     font-size: 15px;
   }
   h1 { font-size: 1.4em; }
+  .manuscript { padding: 0 12px 24px 48px; }
+  .manuscript::before { left: 30px; }
+  .manuscript::after  { left: 34px; }
   .page-header {
-    flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 0.6em;
   }
-  .page-header h1 { font-size: 1.3em; }
-  .btn-primary, .btn-large {
-    text-align: center;
-  }
+  .page-header h1 { font-size: 21px; }
+  .page-header-count, .page-header-filter { font-size: 11px; }
+  .btn-large { text-align: center; }
   .book-grid {
     grid-template-columns: 1fr;
   }
+  .book-card { grid-template-columns: 112px 1fr; height: 176px; }
+  .book-card .bc-cover { width: 112px; }
+  .book-card .bc-title { font-size: 14px; }
   .filter-form {
-    gap: 0.4em;
-  }
-  .filter-form input[type="text"] {
-    flex: 1;
-    min-width: 0;
+    gap: 0.6em;
   }
   .filter-nav .fn-label {
-    min-width: 4em;
-    font-size: 0.8em;
+    min-width: 3.4em;
+    font-size: 11px;
   }
   .drag-hint { text-align: center; }
   .book-detail {
@@ -396,27 +463,38 @@ a { color: #06c; }
   }
 }
 
-/* Each book in the grid — handle on left, body on right */
+/* Each book in the grid — [cover] · [body], flat on paper. The cover is the
+   drag handle (grab cursor); the body stays tappable for navigation. */
 .book-card {
-  border: 1px solid #ddd;
+  border: 1px solid #ebddc2;
   border-radius: 6px;
-  background: #fafafa;
+  background: #fdf8ee;
   display: grid;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: 128px 1fr;
   align-items: stretch;
-  transition: box-shadow 0.15s;
+  height: 200px;
   overflow: hidden;
 }
 .book-card .bc-cover {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  width: 56px;
+  width: 128px;
   align-self: stretch;
-  padding: 4px;
-  background: #f0f0f2;
-  border-right: 1px solid #eaeaea;
+  background: #4f6149;
+  border-right: 1px solid #f0e6d2;
   overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.book-card .bc-cover:active { cursor: grabbing; }
+/* When a real cover image loads, drop the padding/jacket color framing */
+.book-card .bc-cover.has-image {
+  align-items: center;
+  padding: 4px;
+  background: #efe7d4;
 }
 .book-card .bc-cover img {
   max-width: 100%;
@@ -424,56 +502,68 @@ a { color: #06c; }
   object-fit: contain;
   display: block;
 }
-.book-card .bc-cover-fallback {
-  font-size: 1.3em;
-  opacity: 0.35;
-}
-.book-card:hover {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  border-color: #c5c5c5;
+/* Fallback: vertical (縦書き) title on a colored jacket */
+.book-card .bc-cover-title {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-family: "Shippori Mincho B1", serif;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 1px;
+  color: #f3ead7;
+  padding: 14px 0;
+  max-height: 100%;
+  overflow: hidden;
 }
 .book-card .bc-body {
-  padding: 0.7em 0.9em;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 0.3em;
+  justify-content: center;
   min-width: 0;
+  overflow: hidden;
 }
-.book-card .bc-status { margin-bottom: 0.1em; }
 .book-card .bc-title {
-  font-weight: bold;
-  font-size: 1em;
-  color: #222;
+  font-family: "Zen Old Mincho", serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: #2c2722;
   text-decoration: none;
-  line-height: 1.3;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.book-card .bc-title:hover { color: #06c; }
-.book-card .bc-author { font-size: 0.85em; color: #555; }
+.book-card .bc-title:hover { color: #b1543a; }
+.book-card .bc-author { font-size: 12px; color: #a08f73; margin-top: 2px; }
 .book-card .bc-meta {
-  font-size: 0.78em;
-  color: #666;
+  font-size: 11px;
+  color: #9a8c79;
   display: flex;
-  gap: 0.5em;
+  gap: 6px;
+  align-items: center;
   flex-wrap: wrap;
+  margin-top: 5px;
 }
 .book-card .bc-format {
-  background: #ecedef;
-  color: #444;
-  padding: 0.1em 0.5em;
+  color: #8a7256;
+  border: 1px solid #e0cfa8;
+  padding: 0 6px;
   border-radius: 3px;
 }
-.book-card .bc-tags { color: #777; }
+.book-card .bc-tags { color: #9a8c79; }
 .book-card .bc-why {
-  font-size: 0.8em;
-  color: #555;
+  font-family: "Zen Old Mincho", serif;
   font-style: italic;
-  margin-top: auto;
-  padding-top: 0.3em;
-  border-top: 1px dashed #e0e0e0;
+  font-size: 12px;
+  color: #6b6256;
+  line-height: 1.55;
+  margin-top: 6px;
+  padding-left: 9px;
+  border-left: 2px solid #d9a08c;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -487,6 +577,7 @@ a { color: #06c; }
   padding: 1.2em 1.5em;
   margin: 0.5em 0 1.5em;
   background: #fafafa;
+  max-width: 760px;
 }
 .book-detail .bd-header {
   display: flex;
@@ -539,28 +630,6 @@ a { color: #06c; }
   color: #222 !important;
 }
 
-/* Filter pill — small pill button for filter switches */
-.filter-pill {
-  display: inline-block;
-  padding: 0.25em 0.75em;
-  font-size: 0.85em;
-  background: #fff;
-  color: #555 !important;
-  border: 1px solid #c5c5c5;
-  border-radius: 999px;
-  text-decoration: none;
-  margin: 0.15em 0.1em;
-}
-.filter-pill:hover {
-  background: #f5f5f5;
-  border-color: #999;
-}
-.filter-pill.active {
-  background: #e6f1ea;
-  border-color: #2b7a4b;
-  color: #1d5234 !important;
-  font-weight: bold;
-}
 .btn-secondary {
   display: inline-flex;
   align-items: center;
@@ -615,6 +684,7 @@ a { color: #06c; }
   grid-template-columns: 1fr 1fr;
   gap: 0.9em 1em;
   align-items: start;
+  max-width: 880px;
 }
 .book-form .form-errors,
 .book-form .form-actions {

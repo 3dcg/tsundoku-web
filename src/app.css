@@ -783,11 +783,12 @@ a { color: #b1543a; }
 @media (max-width: 600px) {
   .book-form .form-actions {
     position: sticky;
-    /* Lift above the home indicator / rounded corners so buttons aren't clipped */
-    bottom: max(0.8em, env(safe-area-inset-bottom));
+    /* Stick to the very bottom; the bottom padding lifts the buttons above the
+       home indicator while the solid fill covers everything below them. */
+    bottom: 0;
     margin-top: 1.4em;
-    padding: 0.7em 0;
-    background: linear-gradient(to top, #fff 72%, rgba(255, 255, 255, 0));
+    padding: 0.7em 0 max(0.8em, env(safe-area-inset-bottom));
+    background: linear-gradient(to top, #fff 82%, rgba(255, 255, 255, 0));
     z-index: 50;
   }
   /* 主要・補助・破棄・戻る系のボタンを同じ縦幅・同じ文字サイズに統一 */

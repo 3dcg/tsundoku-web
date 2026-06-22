@@ -781,14 +781,18 @@ a { color: #b1543a; }
 }
 /* On phones, keep the save button within thumb reach and big enough to tap */
 @media (max-width: 600px) {
+  /* Cancel body's bottom padding so the sticky action bar sits flush at the
+     bottom edge and doesn't lift up when scrolled all the way down. */
+  .book-form { margin-bottom: -2.4em; }
   .book-form .form-actions {
     position: sticky;
-    /* Stick to the very bottom; the bottom padding lifts the buttons above the
-       home indicator while the solid fill covers everything below them. */
     bottom: 0;
     margin-top: 1.4em;
-    padding: 0.7em 0 max(0.8em, env(safe-area-inset-bottom));
-    background: linear-gradient(to top, #fff 82%, rgba(255, 255, 255, 0));
+    padding: 0.8em 0 max(0.8em, env(safe-area-inset-bottom));
+    /* Match the detail page's status-changer / delete-zone treatment: a dashed
+       rule on the opaque paper background (not a white fill). */
+    background: #faf4e8;
+    border-top: 1px dashed #c5c5c5;
     z-index: 50;
   }
   /* 主要・補助・破棄・戻る系のボタンを同じ縦幅・同じ文字サイズに統一 */

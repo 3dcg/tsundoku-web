@@ -11,11 +11,20 @@
  *   serif: "Zen Old Mincho" · vertical: "Shippori Mincho B1" · ui: "Zen Kaku Gothic New"
  */
 
+/* Global box model + overflow guard.
+   - border-box: padding/borders never push an element past its declared width.
+   - overflow-x: clip on html/body kills the slight horizontal scroll seen on
+     iPhone (clip, not hidden, so position:sticky form-actions keep working). */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+
 body {
   font-family: "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
   max-width: 1800px;
   margin: 0 auto;
-  padding: 1.4em 1em 3em;
+  /* Respect the notch / rounded corners under viewport-fit=cover so content
+     isn't pushed under the safe-area edges (a source of the right-edge bleed). */
+  padding: 1.4em max(1em, env(safe-area-inset-right)) 3em max(1em, env(safe-area-inset-left));
   background: #faf4e8;
   color: #2c2722;
   line-height: 1.5;
@@ -418,7 +427,7 @@ a { color: #b1543a; }
 @media (max-width: 600px) {
   body {
     margin: 0 auto;
-    padding: 1em 0.6em 2.4em;
+    padding: 1em max(0.6em, env(safe-area-inset-right)) 2.4em max(0.6em, env(safe-area-inset-left));
     font-size: 15px;
   }
   h1 { font-size: 1.4em; }

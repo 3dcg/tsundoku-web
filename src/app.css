@@ -783,7 +783,8 @@ a { color: #b1543a; }
 @media (max-width: 600px) {
   .book-form .form-actions {
     position: sticky;
-    bottom: 0;
+    /* Lift above the home indicator / rounded corners so buttons aren't clipped */
+    bottom: max(0.8em, env(safe-area-inset-bottom));
     margin-top: 1.4em;
     padding: 0.7em 0;
     background: linear-gradient(to top, #fff 72%, rgba(255, 255, 255, 0));

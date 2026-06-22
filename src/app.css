@@ -431,9 +431,9 @@ a { color: #b1543a; }
     font-size: 15px;
   }
   h1 { font-size: 1.4em; }
-  .manuscript { padding: 0 12px 24px 48px; }
-  .manuscript::before { left: 30px; }
-  .manuscript::after  { left: 34px; }
+  .manuscript { padding: 0 12px 24px 26px; }
+  .manuscript::before { left: 12px; }
+  .manuscript::after  { left: 16px; }
   .page-header {
     align-items: center;
     gap: 0.6em;

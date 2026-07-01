@@ -259,6 +259,30 @@ a { color: #b1543a; }
   font-size: 11px;
   color: #a99c86;
 }
+/* Clickable header toggles the section open/closed */
+.status-section-toggle {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.status-section-chevron {
+  color: #a99c86;
+  font-size: 12px;
+  transition: transform 0.15s ease;
+  transform: translateY(-1px);
+}
+.status-section-chevron.collapsed {
+  transform: translateY(-1px) rotate(-90deg);
+}
 
 /* Card grid per section — at least ~4 across on a normal window, more as it
    widens (auto-fill packs columns to the available width). */

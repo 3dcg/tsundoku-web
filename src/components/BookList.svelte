@@ -59,6 +59,29 @@
     e.preventDefault();
     onChangeFilter?.({ ...params, q: searchInput });
   }
+
+  // Collapsed status sections (UI preference, persisted locally — not synced)
+  const COLLAPSE_KEY = "tsundoku:collapsedStatuses";
+  let collapsed = $state(new Set(loadCollapsed()));
+
+  function loadCollapsed() {
+    try {
+      const raw = localStorage.getItem(COLLAPSE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function toggleCollapsed(statusKey) {
+    const next = new Set(collapsed);
+    if (next.has(statusKey)) next.delete(statusKey);
+    else next.add(statusKey);
+    collapsed = next;
+    try {
+      localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...next]));
+    } catch {}
+  }
 </script>
 
 <div class="manuscript">
@@ -133,14 +156,20 @@
   {#each groups as group (group.status)}
     <section class="status-section">
       <h2 class="status-section-title">
-        <StatusBadge status={group.status} />
-        <span class="status-section-count">{group.items.length}冊</span>
+        <button class="status-section-toggle" onclick={() => toggleCollapsed(group.status)}
+                aria-expanded={!collapsed.has(group.status)}>
+          <span class="status-section-chevron" class:collapsed={collapsed.has(group.status)}>▾</span>
+          <StatusBadge status={group.status} />
+          <span class="status-section-count">{group.items.length}冊</span>
+        </button>
       </h2>
-      <div class="book-grid" use:setupSortable={group.status}>
-        {#each group.items as book (book.id)}
-          <BookCard {book} {onShow} />
-        {/each}
-      </div>
+      {#if !collapsed.has(group.status)}
+        <div class="book-grid" use:setupSortable={group.status}>
+          {#each group.items as book (book.id)}
+            <BookCard {book} {onShow} />
+          {/each}
+        </div>
+      {/if}
     </section>
   {/each}
 {/if}
